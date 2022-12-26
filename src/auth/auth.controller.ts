@@ -1,15 +1,31 @@
-import { Controller } from '@nestjs/common';
-import { Post, Request, UseGuards } from '@nestjs/common/decorators';
+import { Controller, Body } from '@nestjs/common';
+import { Post } from '@nestjs/common/decorators';
+import {
+  ApiBody,
+  ApiTags,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard } from './guards/local-auth.guard';
+import { AuthLoginDto } from './dtos/auth-login.dto';
+import { AuthRegisterDTO } from './dtos/auth-register.dto';
 
-@Controller('api/auth')
+@ApiTags('auth')
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @UseGuards(LocalAuthGuard)
+  @ApiBody({ type: AuthLoginDto })
+  @ApiNotFoundResponse({ description: 'User Not Found', type: AuthLoginDto })
+  @ApiOkResponse()
   @Post('login')
-  async login(@Request() req) {
-    return req.user;
+  async login(@Body() req: AuthLoginDto) {
+    return this.authService.login(req);
+  }
+
+  @ApiBody({ type: AuthRegisterDTO })
+  @Post('register')
+  async register(@Body() req: AuthRegisterDTO) {
+    return this.authService.register(req);
   }
 }
