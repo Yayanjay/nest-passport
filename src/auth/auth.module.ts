@@ -9,6 +9,7 @@ import { JwtStrategy } from './strats/jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersEntity } from 'src/users/entities/users.entity';
 import { EncryptAndHashing } from 'src/utils/encryptAndHash';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   controllers: [AuthController],
@@ -16,10 +17,8 @@ import { EncryptAndHashing } from 'src/utils/encryptAndHash';
   imports: [
     UsersModule,
     PassportModule,
-    JwtModule.register({
-      secret: `${process.env.JWT_SECRET}`,
-      signOptions: { expiresIn: '60s' },
-    }),
+    ConfigModule.forRoot(),
+    JwtModule.register({ secret: `${process.env.JWT_SECRET}` }),
     TypeOrmModule.forFeature([UsersEntity]),
   ],
   exports: [AuthService],

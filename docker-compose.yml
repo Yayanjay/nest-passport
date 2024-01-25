@@ -1,0 +1,15 @@
+version: '3'
+services:
+  puntadhewa:
+    container_name: puntadhewa
+    image: mysql:latest
+    restart: always
+    volumes:
+      - ./data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=user_management
+      - MYSQL_USER=pandhawa
+      - MYSQL_PASSWORD=pandhawa
+    ports:
+      - 3307:3306

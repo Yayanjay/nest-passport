@@ -12,7 +12,11 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from 'src/users/entities/users.entity';
 import { EncryptAndHashing } from 'src/utils/encryptAndHash';
-import { BadRequestException } from '@nestjs/common/exceptions';
+import {
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common/exceptions';
+import { use } from 'passport';
 
 @Injectable()
 export class AuthService {
@@ -36,10 +40,9 @@ export class AuthService {
 
   async login(user: AuthLoginDto) {
     try {
-      const savedUser = await this.userRepository
-        .createQueryBuilder('users')
-        .where('users.username = :username', { username: user.username })
-        .getOne();
+      const savedUser = await this.userRepository.findOneBy({
+        username: user.username,
+      });
 
       if (!savedUser) {
         return new NotFoundException('User Not Found', {
@@ -56,7 +59,7 @@ export class AuthService {
         sub: savedUser.id,
         username: savedUser.username,
         email: savedUser.email,
-        roles: [],
+        roles: [savedUser.role],
         previlage: [],
       };
       // console.log(payload);
@@ -65,7 +68,7 @@ export class AuthService {
         return {
           statusCode: 200,
           message: 'Login Succeed',
-          data: { ...payload, access_token: data },
+          data: { access_token: data },
         };
       }
     } catch (error) {
@@ -78,18 +81,29 @@ export class AuthService {
     // };
   }
 
-  async register(user: AuthRegisterDTO) {
+  async register(request: AuthRegisterDTO) {
     try {
+      const isUserExist = await this.userRepository.findBy({
+        username: request.username,
+      });
+      console.log(isUserExist);
+
+      if (isUserExist.length >= 1) {
+        return new ConflictException('Username Already Exist');
+      }
       const hashedPassword = await this.encryptAndHashing.hashPassword(
-        user.password,
+        request.password,
       );
       const newUser = this.userRepository.create({
-        email: user.email,
-        username: user.username,
+        email: request.email,
+        username: request.username,
+        fullname: request.fullname,
         password: hashedPassword,
+        role: request.role,
       });
 
-      const { password, ...data } = await this.userRepository.save(newUser);
+      const { password, id, ...data } = await this.userRepository.save(newUser);
+      console.log(data);
 
       return {
         status: 201,

@@ -2,10 +2,12 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Role } from '../dto/roles.enum';
 
 @Entity({ name: 'users' })
 export class UsersEntity {
@@ -16,14 +18,23 @@ export class UsersEntity {
   username: string;
 
   @Column()
+  fullname: string;
+
+  @Column()
   email: string;
 
   @Column()
   password: string;
 
-  @CreateDateColumn({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP(6)',
-  })
+  @Column({type: 'enum', enum: Role})
+  role: string;
+
+  @CreateDateColumn()
   created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
+
+  @DeleteDateColumn()
+  deleted_at: Date;
 }
