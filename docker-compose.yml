@@ -1,15 +1,15 @@
 version: '3'
 services:
-  puntadhewa:
-    container_name: puntadhewa
-    image: mysql:latest
-    restart: always
+  postgres:
+    container_name: postgres
+    image: postgres
     volumes:
-      - ./data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
     environment:
-      - MYSQL_ROOT_PASSWORD=password
-      - MYSQL_DATABASE=user_management
-      - MYSQL_USER=pandhawa
-      - MYSQL_PASSWORD=pandhawa
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: postgres
     ports:
-      - 3307:3306
+      - 5434:5432
+volumes:
+  postgres_data:
